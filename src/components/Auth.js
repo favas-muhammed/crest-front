@@ -23,9 +23,10 @@ const Auth = () => {
       }
 
       const data = await response.json();
-      // Store the token in localStorage or your preferred state management solution
+      // Store the token and user data in localStorage
       localStorage.setItem("token", data.token);
-      window.location.href = "/profile"; // Redirect to profile page after successful login
+      localStorage.setItem("userName", data.user.name);
+      window.location.href = "/"; // Redirect to home page after successful login
     } catch (error) {
       console.error("Authentication error:", error);
       alert("Failed to authenticate with Google");
