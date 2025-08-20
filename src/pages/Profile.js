@@ -118,12 +118,14 @@ const Profile = () => {
 
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      // Ensure email is included in the submission
+      // Format the date and prepare submission data
       const dataToSubmit = {
         ...formData,
         email: localStorage.getItem("userEmail"),
+        dateOfBirth: formData.dateOfBirth, // Send the date as is from the form
       };
 
+      console.log("Submitting profile data:", dataToSubmit);
       const response = await api.post("/api/profile", dataToSubmit);
 
       if (response.data) {
@@ -132,10 +134,19 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error saving profile:", error);
+      console.error("Error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
       if (error.message === "Authentication required") {
         window.location.href = "/";
       } else if (error.response?.data?.message) {
-        alert(error.response.data.message);
+        alert(`Error: ${error.response.data.message}`);
+        if (error.response.data.currentDate) {
+          console.log("Current date in DB:", error.response.data.currentDate);
+        }
       } else {
         alert(
           "Failed to save profile. Please ensure all fields are filled correctly."

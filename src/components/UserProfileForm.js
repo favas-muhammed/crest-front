@@ -23,7 +23,16 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      // Format the date to YYYY-MM-DD for the input
+      const formattedDate = initialData.dateOfBirth
+        ? new Date(initialData.dateOfBirth).toISOString().split("T")[0]
+        : "";
+
+      setFormData({
+        ...initialData,
+        dateOfBirth: formattedDate,
+      });
+
       // Set saved fields based on whether they exist in initialData and have been submitted
       setSavedFields({
         firstName: !!initialData.firstName?.trim(),
@@ -108,7 +117,7 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="contactNumber">Contact Number*</label>
+          <label htmlFor="contactNumber">Contact Number* (Editable)</label>
           <input
             type="tel"
             id="contactNumber"
@@ -116,7 +125,13 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
             value={formData.contactNumber}
             onChange={handleChange}
             required
+            className="editable-input"
           />
+          {editMode && (
+            <small className="field-hint success">
+              You can update this field at any time
+            </small>
+          )}
         </div>
 
         <div className="form-group">
@@ -138,7 +153,7 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="country">Country*</label>
+          <label htmlFor="country">Country* (Editable)</label>
           <input
             type="text"
             id="country"
@@ -146,11 +161,17 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
             value={formData.country}
             onChange={handleChange}
             required
+            className="editable-input"
           />
+          {editMode && (
+            <small className="field-hint success">
+              You can update this field at any time
+            </small>
+          )}
         </div>
 
         <div className="form-group full-width">
-          <label htmlFor="address">Address*</label>
+          <label htmlFor="address">Address* (Editable)</label>
           <textarea
             id="address"
             name="address"
