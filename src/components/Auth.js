@@ -11,7 +11,7 @@ const Auth = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            Accept: "application/json",
           },
           credentials: "include",
           body: JSON.stringify({
@@ -44,9 +44,13 @@ const Auth = () => {
   return (
     <div className="auth-container" role="main" aria-labelledby="auth-title">
       <h2 id="auth-title">Sign in with Google</h2>
-      <div className="login-button-container" role="form" aria-label="Google sign in form">
-        <GoogleLogin 
-          onSuccess={handleSuccess} 
+      <div
+        className="login-button-container"
+        role="form"
+        aria-label="Google sign in form"
+      >
+        <GoogleLogin
+          onSuccess={handleSuccess}
           onError={handleError}
           type="standard"
           theme="filled_blue"
