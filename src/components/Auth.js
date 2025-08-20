@@ -42,9 +42,21 @@ const Auth = () => {
   };
 
   return (
-    <div>
-      <h2>Sign in with Google</h2>
-      <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+    <div className="auth-container" role="main" aria-labelledby="auth-title">
+      <h2 id="auth-title">Sign in with Google</h2>
+      <div className="login-button-container" role="form" aria-label="Google sign in form">
+        <GoogleLogin 
+          onSuccess={handleSuccess} 
+          onError={handleError}
+          type="standard"
+          theme="filled_blue"
+          size="large"
+          text="signin_with"
+          shape="rectangular"
+          locale="en"
+          useOneTap={false}
+        />
+      </div>
     </div>
   );
 };
