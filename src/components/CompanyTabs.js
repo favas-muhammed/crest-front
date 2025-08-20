@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './CompanyTabs.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./CompanyTabs.css";
 
 // Create axios instance with base URL and default headers
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
   headers: {
-    'Content-Type': 'application/json'
+    "Content-Type": "application/json",
   },
-  withCredentials: true
+  withCredentials: true,
 });
 
 const PostNewJob = ({ onJobPosted }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    requirements: '',
-    location: '',
-    salary: ''
+    title: "",
+    description: "",
+    requirements: "",
+    location: "",
+    salary: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -34,22 +34,22 @@ const PostNewJob = ({ onJobPosted }) => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('token');
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const token = localStorage.getItem("token");
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      await api.post('/api/jobs', formData);
+      await api.post("/api/jobs", formData);
       setFormData({
-        title: '',
-        description: '',
-        requirements: '',
-        location: '',
-        salary: ''
+        title: "",
+        description: "",
+        requirements: "",
+        location: "",
+        salary: "",
       });
       onJobPosted();
-      alert('Job posted successfully!');
+      alert("Job posted successfully!");
     } catch (error) {
-      console.error('Error posting job:', error);
-      alert(error.response?.data?.message || 'Failed to post job');
+      console.error("Error posting job:", error);
+      alert(error.response?.data?.message || "Failed to post job");
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +115,7 @@ const PostNewJob = ({ onJobPosted }) => {
           />
         </div>
         <button type="submit" className="submit-button" disabled={isSubmitting}>
-          {isSubmitting ? 'Posting...' : 'Post Job'}
+          {isSubmitting ? "Posting..." : "Post Job"}
         </button>
       </form>
     </div>
@@ -124,10 +124,10 @@ const PostNewJob = ({ onJobPosted }) => {
 
 const JobCard = ({ job, onDelete, onEdit }) => {
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -145,11 +145,21 @@ const JobCard = ({ job, onDelete, onEdit }) => {
         </div>
       </div>
       <div className="job-card-content">
-        <p><strong>Location:</strong> {job.location}</p>
-        <p><strong>Salary:</strong> {job.salary}</p>
-        <p><strong>Posted:</strong> {formatDate(job.createdAt)}</p>
-        <p><strong>Description:</strong> {job.description}</p>
-        <p><strong>Requirements:</strong> {job.requirements}</p>
+        <p>
+          <strong>Location:</strong> {job.location}
+        </p>
+        <p>
+          <strong>Salary:</strong> {job.salary}
+        </p>
+        <p>
+          <strong>Posted:</strong> {formatDate(job.createdAt)}
+        </p>
+        <p>
+          <strong>Description:</strong> {job.description}
+        </p>
+        <p>
+          <strong>Requirements:</strong> {job.requirements}
+        </p>
       </div>
     </div>
   );
@@ -163,14 +173,14 @@ const CurrentPostings = () => {
 
   const fetchJobs = async () => {
     try {
-      const token = localStorage.getItem('token');
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      const response = await api.get('/api/jobs/company-jobs');
+      const token = localStorage.getItem("token");
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const response = await api.get("/api/jobs/company-jobs");
       setJobs(response.data);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
-      alert('Failed to fetch jobs');
+      console.error("Error fetching jobs:", error);
+      alert("Failed to fetch jobs");
     } finally {
       setLoading(false);
     }
@@ -181,17 +191,17 @@ const CurrentPostings = () => {
   }, []);
 
   const handleDelete = async (jobId) => {
-    if (window.confirm('Are you sure you want to delete this job posting?')) {
+    if (window.confirm("Are you sure you want to delete this job posting?")) {
       try {
-        const token = localStorage.getItem('token');
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
+        const token = localStorage.getItem("token");
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
         await api.delete(`/api/jobs/${jobId}`);
         fetchJobs();
-        alert('Job deleted successfully');
+        alert("Job deleted successfully");
       } catch (error) {
-        console.error('Error deleting job:', error);
-        alert('Failed to delete job');
+        console.error("Error deleting job:", error);
+        alert("Failed to delete job");
       }
     }
   };
@@ -203,17 +213,17 @@ const CurrentPostings = () => {
 
   const handleUpdateJob = async (updatedJob) => {
     try {
-      const token = localStorage.getItem('token');
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+      const token = localStorage.getItem("token");
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
       await api.put(`/api/jobs/${editingJob._id}`, updatedJob);
       setShowEditForm(false);
       setEditingJob(null);
       fetchJobs();
-      alert('Job updated successfully');
+      alert("Job updated successfully");
     } catch (error) {
-      console.error('Error updating job:', error);
-      alert('Failed to update job');
+      console.error("Error updating job:", error);
+      alert("Failed to update job");
     }
   };
 
@@ -230,16 +240,19 @@ const CurrentPostings = () => {
     return (
       <div className="tab-content">
         <h3>Edit Job Posting</h3>
-        <form className="job-post-form" onSubmit={(e) => {
-          e.preventDefault();
-          handleUpdateJob({
-            title: e.target.title.value,
-            description: e.target.description.value,
-            requirements: e.target.requirements.value,
-            location: e.target.location.value,
-            salary: e.target.salary.value
-          });
-        }}>
+        <form
+          className="job-post-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleUpdateJob({
+              title: e.target.title.value,
+              description: e.target.description.value,
+              requirements: e.target.requirements.value,
+              location: e.target.location.value,
+              salary: e.target.salary.value,
+            });
+          }}
+        >
           <div className="form-group">
             <label>Job Title*</label>
             <input
@@ -286,8 +299,14 @@ const CurrentPostings = () => {
             />
           </div>
           <div className="form-actions">
-            <button type="submit" className="submit-button">Update Job</button>
-            <button type="button" className="cancel-button" onClick={handleCancelEdit}>
+            <button type="submit" className="submit-button">
+              Update Job
+            </button>
+            <button
+              type="button"
+              className="cancel-button"
+              onClick={handleCancelEdit}
+            >
               Cancel
             </button>
           </div>
@@ -301,7 +320,7 @@ const CurrentPostings = () => {
       <h3>Current Job Postings</h3>
       <div className="job-listings">
         {jobs.length > 0 ? (
-          jobs.map(job => (
+          jobs.map((job) => (
             <JobCard
               key={job._id}
               job={job}
@@ -310,9 +329,7 @@ const CurrentPostings = () => {
             />
           ))
         ) : (
-          <div className="no-jobs-message">
-            No active job postings yet
-          </div>
+          <div className="no-jobs-message">No active job postings yet</div>
         )}
       </div>
     </div>
@@ -324,35 +341,33 @@ const Employees = () => (
     <h3>Employees</h3>
     <div className="employees-list">
       {/* Employees list will be mapped here */}
-      <div className="no-employees-message">
-        No employees found
-      </div>
+      <div className="no-employees-message">No employees found</div>
     </div>
   </div>
 );
 
 const CompanyTabs = () => {
-  const [activeTab, setActiveTab] = useState('postJob');
+  const [activeTab, setActiveTab] = useState("postJob");
   const [jobsUpdated, setJobsUpdated] = useState(false);
 
   const tabs = [
-    { id: 'postJob', label: 'Post New Job', icon: 'fas fa-plus-circle' },
-    { id: 'currentPosts', label: 'Current Postings', icon: 'fas fa-list-alt' },
-    { id: 'employees', label: 'Employees', icon: 'fas fa-users' }
+    { id: "postJob", label: "Post New Job", icon: "fas fa-plus-circle" },
+    { id: "currentPosts", label: "Current Postings", icon: "fas fa-list-alt" },
+    { id: "employees", label: "Employees", icon: "fas fa-users" },
   ];
 
   const handleJobPosted = () => {
-    setJobsUpdated(prev => !prev);
-    setActiveTab('currentPosts');
+    setJobsUpdated((prev) => !prev);
+    setActiveTab("currentPosts");
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'postJob':
+      case "postJob":
         return <PostNewJob onJobPosted={handleJobPosted} />;
-      case 'currentPosts':
+      case "currentPosts":
         return <CurrentPostings key={jobsUpdated} />;
-      case 'employees':
+      case "employees":
         return <Employees />;
       default:
         return null;
@@ -362,10 +377,10 @@ const CompanyTabs = () => {
   return (
     <div className="company-tabs-container">
       <div className="tabs-header">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+            className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
             onClick={() => setActiveTab(tab.id)}
           >
             <i className={tab.icon}></i>
@@ -373,9 +388,7 @@ const CompanyTabs = () => {
           </button>
         ))}
       </div>
-      <div className="tab-content-container">
-        {renderTabContent()}
-      </div>
+      <div className="tab-content-container">{renderTabContent()}</div>
     </div>
   );
 };

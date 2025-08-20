@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Auth from "../components/Auth";
 import Sidebar from "../components/navigation/Sidebar";
+import JobList from "../components/JobList";
 import "./Home.css";
 
 const Home = () => {
@@ -24,7 +25,7 @@ const Home = () => {
         {isAuthenticated ? (
           <div className="dashboard">
             <h1>Hey {userName}!</h1>
-            <p>Welcome to your dashboard.</p>
+            <JobList />
           </div>
         ) : (
           <div className="login-content">
