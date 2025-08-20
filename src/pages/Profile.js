@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UserProfileForm from "../components/UserProfileForm";
 import UserProfileCard from "../components/UserProfileCard";
+import CompanyTabs from "../components/CompanyTabs";
 import "./Profile.css";
 
 // Create axios instance with base URL and default headers
@@ -207,23 +208,30 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
-      {profileData && !isEditing ? (
-        <UserProfileCard
-          userData={profileData}
-          onEdit={handleEdit}
-          onDelete={handleDeleteAccount}
-        />
-      ) : (
-        <>
-          <h2 className="profile-form-title">
-            {profileData ? "Edit Profile" : "Complete Your Profile"}
-          </h2>
-          <UserProfileForm
-            initialData={profileData}
-            onSubmit={handleSubmitProfile}
-            editMode={!!profileData}
+      <div className="profile-section">
+        {profileData && !isEditing ? (
+          <UserProfileCard
+            userData={profileData}
+            onEdit={handleEdit}
+            onDelete={handleDeleteAccount}
           />
-        </>
+        ) : (
+          <>
+            <h2 className="profile-form-title">
+              {profileData ? "Edit Profile" : "Complete Your Profile"}
+            </h2>
+            <UserProfileForm
+              initialData={profileData}
+              onSubmit={handleSubmitProfile}
+              editMode={!!profileData}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Show CompanyTabs only if user is registered as a company and profile is complete */}
+      {profileData && !isEditing && profileData.registerAs === 'company' && (
+        <CompanyTabs />
       )}
     </div>
   );

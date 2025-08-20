@@ -1,0 +1,45 @@
+.company-nav-bar {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  margin: 2rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.company-nav-bar .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.company-nav-bar .nav-item:hover {
+  background-color: #007bff;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.company-nav-bar .nav-item i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .company-nav-bar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+  }
+  
+  .company-nav-bar .nav-item {
+    width: 100%;
+    justify-content: center;
+  }
+}
