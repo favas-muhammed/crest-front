@@ -11,8 +11,10 @@ const Auth = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${credentialResponse.credential}`
           },
+          mode: "cors",
           credentials: "include",
           body: JSON.stringify({
             credential: credentialResponse.credential,
