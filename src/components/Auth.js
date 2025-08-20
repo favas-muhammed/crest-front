@@ -26,6 +26,7 @@ const Auth = () => {
       // Store the token and user data in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("userName", data.user.name);
+      localStorage.setItem("userEmail", data.user.email);
       window.location.href = "/"; // Redirect to home page after successful login
     } catch (error) {
       console.error("Authentication error:", error);

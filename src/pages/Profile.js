@@ -1,31 +1,219 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import UserProfileForm from "../components/UserProfileForm";
+import UserProfileCard from "../components/UserProfileCard";
+import "./Profile.css";
+
+// Create axios instance with base URL and default headers
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true, // Enable sending cookies and auth headers
+});
 
 const Profile = () => {
-  const [user, setUser] = React.useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
-    const fetchUserData = async () => {
+  useEffect(() => {
+    const fetchUserProfile = async () => {
       try {
-        const response = await axios.get("/api/user/profile");
-        setUser(response.data);
+        // First get the email and token from localStorage
+        const userEmail = localStorage.getItem("userEmail");
+        const token = localStorage.getItem("token");
+
+        if (!userEmail || !token) {
+          throw new Error("Authentication required");
+        }
+
+        // Set token in axios headers
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        try {
+          // Then fetch the profile data
+          const response = await api.get("/api/profile");
+          // Check if any required fields are empty
+          const requiredFields = [
+            "firstName",
+            "lastName",
+            "contactNumber",
+            "dateOfBirth",
+            "country",
+            "address",
+            "registerAs",
+          ];
+          const hasEmptyFields = requiredFields.some(
+            (field) => !response.data[field]?.trim()
+          );
+
+          const profileWithEmail = {
+            ...response.data,
+            email: userEmail, // Ensure we're using the email from Google auth
+          };
+          setProfileData(profileWithEmail);
+
+          // If profile exists but registerAs is missing, allow editing
+          setIsEditing(hasEmptyFields || !response.data.registerAs);
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            // If profile doesn't exist, show the form with empty fields
+            setProfileData({
+              email: userEmail,
+              firstName: "",
+              lastName: "",
+              address: "",
+              contactNumber: "",
+              dateOfBirth: "",
+              country: "",
+              registerAs: "",
+            });
+            setIsEditing(true); // Automatically show form for new users
+          } else {
+            throw error;
+          }
+        }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching profile:", error);
+        if (error.message === "Authentication required") {
+          window.location.href = "/";
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserData();
+    fetchUserProfile();
   }, []);
 
-  if (!user) {
-    return <div>Loading...</div>;
+  const handleSubmitProfile = async (formData) => {
+    try {
+      // Validate all fields are filled
+      const requiredFields = [
+        "firstName",
+        "lastName",
+        "contactNumber",
+        "dateOfBirth",
+        "country",
+        "address",
+        "registerAs",
+      ];
+      const emptyFields = requiredFields.filter((field) => {
+        // Special handling for dateOfBirth since it's not a string
+        if (field === "dateOfBirth") return !formData[field];
+        return !formData[field]?.trim();
+      });
+
+      if (emptyFields.length > 0) {
+        alert(`Please fill in all required fields: ${emptyFields.join(", ")}`);
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // Ensure email is included in the submission
+      const dataToSubmit = {
+        ...formData,
+        email: localStorage.getItem("userEmail"),
+      };
+
+      const response = await api.post("/api/profile", dataToSubmit);
+
+      if (response.data) {
+        setProfileData(response.data);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      if (error.message === "Authentication required") {
+        window.location.href = "/";
+      } else if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert(
+          "Failed to save profile. Please ensure all fields are filled correctly."
+        );
+      }
+    }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmDelete = () => {
+      return new Promise((resolve) => {
+        const result = window.confirm(
+          "Warning: This action will permanently delete your account and all associated data. " +
+            "This cannot be undone. Are you sure you want to proceed?"
+        );
+        resolve(result);
+      });
+    };
+
+    try {
+      const confirmed = await confirmDelete();
+      if (!confirmed) return;
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      await api.delete("/api/users/delete-account");
+
+      // Clear local storage
+      localStorage.removeItem("token");
+      localStorage.removeItem("userEmail");
+
+      // Show success message before redirect
+      alert("Your account has been successfully deleted.");
+
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Failed to delete account. Please try again.");
+      }
+    }
+  };
+
+  if (loading) {
+    return <div className="profile-loading">Loading...</div>;
   }
 
   return (
-    <div>
-      <h1>{user.name}'s Profile</h1>
-      <p>Email: {user.email}</p>
-      <p>Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
+    <div className="profile-page">
+      {profileData && !isEditing ? (
+        <UserProfileCard
+          userData={profileData}
+          onEdit={handleEdit}
+          onDelete={handleDeleteAccount}
+        />
+      ) : (
+        <>
+          <h2 className="profile-form-title">
+            {profileData ? "Edit Profile" : "Complete Your Profile"}
+          </h2>
+          <UserProfileForm
+            initialData={profileData}
+            onSubmit={handleSubmitProfile}
+            editMode={!!profileData}
+          />
+        </>
+      )}
     </div>
   );
 };
