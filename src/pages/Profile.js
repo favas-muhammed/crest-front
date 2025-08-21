@@ -21,11 +21,23 @@ const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key for forcing updates
+
+  // Add auto-refresh effect
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      if (loading) {
+        setRefreshKey((oldKey) => oldKey + 1); // Force refresh every 2 seconds while loading
+      }
+    }, 2000);
+
+    return () => clearInterval(refreshInterval);
+  }, [loading]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        // First get the email and token from localStorage
+        // Get cached email and token
         const userEmail = localStorage.getItem("userEmail");
         const token = localStorage.getItem("token");
 
@@ -37,30 +49,23 @@ const Profile = () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         try {
-          // Then fetch the profile data
           const response = await api.get("/api/profile");
-          // Check if any required fields are empty
-          const requiredFields = [
-            "firstName",
-            "lastName",
-            "contactNumber",
-            "dateOfBirth",
-            "country",
-            "address",
-            "registerAs",
-          ];
-          const hasEmptyFields = requiredFields.some(
-            (field) => !response.data[field]?.trim()
-          );
+
+          // Quick validation of required fields
+          const hasRequiredFields =
+            response.data.firstName &&
+            response.data.lastName &&
+            response.data.registerAs;
 
           const profileWithEmail = {
             ...response.data,
-            email: userEmail, // Ensure we're using the email from Google auth
+            email: userEmail,
+            isProfileSubmitted: true, // Mark as submitted if we got data
           };
-          setProfileData(profileWithEmail);
 
-          // If profile exists but registerAs is missing, allow editing
-          setIsEditing(hasEmptyFields || !response.data.registerAs);
+          setProfileData(profileWithEmail);
+          setIsEditing(!hasRequiredFields);
+          setLoading(false); // Stop loading once we have data
         } catch (error) {
           if (error.response && error.response.status === 404) {
             // If profile doesn't exist, show the form with empty fields
@@ -94,7 +99,7 @@ const Profile = () => {
 
   const handleSubmitProfile = async (formData) => {
     try {
-      // Validate all fields are filled
+      setLoading(true); // Show loading state while submitting
       const requiredFields = [
         "firstName",
         "lastName",
@@ -137,10 +142,41 @@ const Profile = () => {
       console.log("Submitting profile data:", dataToSubmit);
       const response = await api.post("/api/profile", dataToSubmit);
 
-      if (response.data) {
-        setProfileData(response.data);
+      // Start loading and refresh cycle
+      setLoading(true);
+
+      // Try to fetch the updated profile immediately
+      try {
+        const freshData = await api.get("/api/profile");
+        const updatedData = {
+          ...freshData.data,
+          email: localStorage.getItem("userEmail"),
+          isProfileSubmitted: true,
+        };
+
+        setProfileData(updatedData);
         setIsEditing(false);
+        setLoading(false);
+      } catch (error) {
+        console.log("Will get data in next refresh cycle");
+        // The auto-refresh will handle getting the latest data
       }
+
+      // Show success message without blocking
+      const notification = document.createElement("div");
+      notification.textContent = "Profile updated successfully!";
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 15px;
+        border-radius: 4px;
+        z-index: 1000;
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
     } catch (error) {
       console.error("Error saving profile:", error);
       console.error("Error details:", {
@@ -211,7 +247,12 @@ const Profile = () => {
   };
 
   if (loading) {
-    return <div className="profile-loading">Loading...</div>;
+    return (
+      <div className="profile-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading your profile... Please wait</p>
+      </div>
+    );
   }
 
   return (

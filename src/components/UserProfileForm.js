@@ -38,6 +38,7 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
         firstName: !!initialData.firstName?.trim(),
         lastName: !!initialData.lastName?.trim(),
         dateOfBirth: !!initialData.dateOfBirth,
+        // Lock registerAs if it has been submitted once
         registerAs: initialData.isProfileSubmitted && !!initialData.registerAs,
       });
     } else {
@@ -183,7 +184,12 @@ const UserProfileForm = ({ initialData, onSubmit, editMode = false }) => {
         </div>
 
         <div className="form-group full-width">
-          <label>Register As*</label>
+          <label>
+            Register As*{" "}
+            {savedFields.registerAs && (
+              <span className="locked-field">(Locked)</span>
+            )}
+          </label>
           <div className="register-as-options">
             <label className="radio-label">
               <input
