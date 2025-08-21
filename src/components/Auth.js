@@ -5,13 +5,7 @@ const Auth = () => {
   const handleSuccess = async (credentialResponse) => {
     try {
       console.log("Google login success:", credentialResponse);
-      const apiUrl =
-        process.env.REACT_APP_ENV === "production"
-          ? process.env.REACT_APP_API_URL
-          : process.env.REACT_APP_API_LOCAL_URL;
-
-      console.log("Using API URL:", apiUrl);
-      console.log("Environment:", process.env.REACT_APP_ENV);
+      const apiUrl = "http://localhost:5000"; // Hardcoding for local development
 
       const response = await fetch(`${apiUrl}/auth/google/verify`, {
         method: "POST",
