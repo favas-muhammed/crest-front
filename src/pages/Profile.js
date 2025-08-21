@@ -7,9 +7,10 @@ import "./Profile.css";
 
 // Create axios instance with base URL and default headers
 const api = axios.create({
-  baseURL: process.env.REACT_APP_ENV === "production"
-    ? process.env.REACT_APP_API_URL
-    : process.env.REACT_APP_API_LOCAL_URL,
+  baseURL:
+    process.env.REACT_APP_ENV === "production"
+      ? process.env.REACT_APP_API_URL
+      : process.env.REACT_APP_API_LOCAL_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -121,7 +122,7 @@ const Profile = () => {
 
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      if (!['company', 'sales'].includes(formData.registerAs)) {
+      if (!["company", "sales"].includes(formData.registerAs)) {
         alert('Register As must be either "company" or "sales"');
         return;
       }
@@ -237,7 +238,7 @@ const Profile = () => {
       </div>
 
       {/* Show CompanyTabs only if user is registered as a company and profile is complete */}
-      {profileData && !isEditing && profileData.registerAs === 'company' && (
+      {profileData && !isEditing && profileData.registerAs === "company" && (
         <CompanyTabs />
       )}
     </div>

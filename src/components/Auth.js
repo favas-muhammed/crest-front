@@ -10,6 +10,9 @@ const Auth = () => {
           ? process.env.REACT_APP_API_URL
           : process.env.REACT_APP_API_LOCAL_URL;
 
+      console.log("Using API URL:", apiUrl);
+      console.log("Environment:", process.env.REACT_APP_ENV);
+
       const response = await fetch(`${apiUrl}/auth/google/verify`, {
         method: "POST",
         headers: {
@@ -17,17 +20,20 @@ const Auth = () => {
           Accept: "application/json",
         },
         mode: "cors",
-        credentials:
-          process.env.REACT_APP_ENV === "production"
-            ? "include"
-            : "same-origin",
+        credentials: "include",
         body: JSON.stringify({
           credential: credentialResponse.credential,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Authentication failed");
+        const errorText = await response.text();
+        console.error("Authentication response error:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+        });
+        throw new Error(`Authentication failed: ${errorText}`);
       }
 
       const data = await response.json();
