@@ -4,7 +4,9 @@ import "./JobList.css";
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_ENV === "production"
+    ? process.env.REACT_APP_API_URL
+    : process.env.REACT_APP_API_LOCAL_URL,
   headers: {
     "Content-Type": "application/json",
   },
