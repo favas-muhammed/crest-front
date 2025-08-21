@@ -5,20 +5,26 @@ const Auth = () => {
   const handleSuccess = async (credentialResponse) => {
     try {
       console.log("Google login success:", credentialResponse);
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/auth/google/verify`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          mode: "cors",
-          credentials: "omit",
-          body: JSON.stringify({
-            credential: credentialResponse.credential
-          })
-        }
-      );
+      const apiUrl =
+        process.env.REACT_APP_ENV === "production"
+          ? process.env.REACT_APP_API_URL
+          : process.env.REACT_APP_API_LOCAL_URL;
+
+      const response = await fetch(`${apiUrl}/auth/google/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        mode: "cors",
+        credentials:
+          process.env.REACT_APP_ENV === "production"
+            ? "include"
+            : "same-origin",
+        body: JSON.stringify({
+          credential: credentialResponse.credential,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Authentication failed");
